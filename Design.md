@@ -1,7 +1,9 @@
-# What problem does Compatriot solve # (Work in progress)
+# What problem does Compatriot solve (Work in progress) #
 
 ## The problem ##
-Contemporary CI/CD solutions make it easy and appealing to execute tests that test software at different levels (unit test, integration tests, etc). They also make it easy to produce reporting artifacts (xUnit supports it out of the box) as well. However, just as no man is an island, (almost) no piece of software exists as a single binary with no compile- or build-time dependencies. Useful information about what configurations of software compositions have been tested and what the outcome usually requires a lot of manual work to compile.
+Contemporary CI/CD solutions make it easy and appealing to execute test runs that test software at different levels (unit test, integration tests, etc). They also make it easy to produce reporting artifacts, i.e. nUnit reports, code coverage reports etc.  
+However, just as no man is an island, (almost) no piece of software exists as a single binary with no compile- or build-time dependencies.  
+The problem: it requires a lot of manual work to compile useful information about what configurations of software compositions have been tested and the test results.
 
 ## Solution ##
 Compatriot solves this by providing a simple way to store and query information about software composition tests.
