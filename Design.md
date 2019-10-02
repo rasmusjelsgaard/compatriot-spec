@@ -16,4 +16,37 @@ It does this by storing the results as tests runs as facts about whether a given
 Compatriot also supports advanced queries that results in tuples of states. See below for a more detailed explanation of this.
 
 ## Use cases ##
+1. Store test results from pipeline in Compatriot so this intel gathering happens automatically.
+2. Query Compatriot to figure if software components that are assumed to be compatible were tested at any point.
+3. Add extra here.
+
+### Features not in scope ###
+Compatriot does not come with any built-in support for CI/CD logic such as failing pipelines based on test results, nor does it gather information about the actual composition of software packages. It has no notion of "flaky" tests or similar concepts. These concerns are left to the tools "on top of" Compatriot.
+
+### Examples using the Compatriot CLI ###
+The examples below assume compatriot has been setup to point to a redis store beforehand.
+
+### Example 1: Storing test results ###
+*In the example below we store the fact that module-a, 1.0.0 works (according to our tests at least)*
+
+```
+$ compatriot (module-a-1.0.0) [(module-b-1.10.1 module-c-2.4.2)] = OK
+```
+
+### Example 2: Storing test results for composited component ###
+*In the example below we store the fact that module-a, v1.0.0, containing module-b in version 1.10.1 and module-c in version 2.4.2 was tested OK.* 
+
+ ```
+$ compatriot (module-a-1.0.0) [(module-b-1.10.1 module-c-2.4.2)] = OK
+``` 
+
+### Example: Query which if a specific version was tested ###
+*In the example below we query compatriot for its knowledge about a specific version of module-a. This has been tested and was ok.
+
+ ```
+$ compatriot module-a-1.0.0
+$ OK
+``` 
+
+If this specific purl had never been tested, we would get status UNKNOWN.
 
