@@ -1,52 +1,162 @@
-# What problem does Compatriot solve (Work in progress) #
+# Table of contents
+1. [Problems solved with compatriot](#problems-solved-by-compatriot)
+   1. [The problem](#the-problem)
+   2. [The solution](#the-solution)
+2. [Use cases](#use-cases)
+3. [Features not in scope](#features-not-in-scope)
+4. [Examples using the Compatriot CLI](#examples-using-the-compatriot-cli)
+5. [Project layout and distributables](#project-layout-and-distributables)
 
-## The problem ##
-Contemporary CI/CD solutions make it easy and appealing to execute test runs that test software at different levels (unit test, integration tests, etc). They also make it easy to produce reporting artifacts, i.e. nUnit reports, code coverage reports etc.  
+# Problems solved by Compatriot
+
+## The problem
+Contemporary IDEs and CI/CD solutions make it easy to execute test runs to test software at different levels (unit test, integration tests, etc). They also make it easy to produce reporting artifacts, i.e. nUnit reports, code coverage reports etc.  
 However, just as no man is an island, (almost) no piece of software exists as a single binary with no compile- or build-time dependencies.  
-The problem: it requires a lot of manual work to compile useful information about what configurations of software compositions have been tested and the test results.
+The problem: it requires a lot of manual work to compile useful information about what software compositions have been tested.
 
-## Solution ##
-Compatriot solves this by providing a simple way to store and query information about software composition tests.
-It does this by storing the results as tests runs as facts about whether a given software composition configruation have been tested. Compatriot can then be queried about the state of specific software compositions. In their simplest form, these queries always result one of three states:
+## The solution
+Compatriot solves this by providing a simple way to store and query information about software composition tests.  
+It does this by storing test run results as facts about whether a given software composition configruation has been tested.  
+Compatriot can then be queried about the test run state of specific software compositions.  
+In their simplest form, these queries always result one of three states:
 
-1. OK
-2. FAILED
+1. PASS
+2. FAIL
 3. UNKNOWN
 
 Compatriot also supports advanced queries that results in tuples of states. See below for a more detailed explanation of this.
 
 ## Use cases ##
-1. Store test results from pipeline in Compatriot so this intel gathering happens automatically.
+1. Store test results from local development and pipelines in Compatriot so this intel gathering happens automatically.
 2. Query Compatriot to figure if software components that are assumed to be compatible were tested at any point.
 3. Add extra here.
 
-### Features not in scope ###
+### Features not in scope
 Compatriot does not come with any built-in support for CI/CD logic such as failing pipelines based on test results, nor does it gather information about the actual composition of software packages. It has no notion of "flaky" tests or similar concepts. These concerns are left to the tools "on top of" Compatriot.
 
-### Examples using the Compatriot CLI ###
-The examples below assume compatriot has been setup to point to a redis store beforehand.
+### Examples using the Compatriot CLI
+The examples below assume that:
+- Compatriot has been setup to point to a redis store beforehand. This is where the data you provide as input to Compatriot is stored.
+  
+Compatriot requires that packages be specified using the [purl notation](https://github.com/package-url/purl-spec). For brevity in the examples I am using a pseudo-purl notation: <package-atom>-<major.minor.patch>, i.e. module-a-1.0.0.
 
-### Example 1: Storing test results ###
-*In the example below we store the fact that module-a, 1.0.0 works (according to our tests at least)*
+### Example 1: Storing test results
+*In the example below we assign the fact that module-a, 1.0.0 works (according to our tests at least)*
 
 ```
-$ compatriot (module-a-1.0.0) [(module-b-1.10.1 module-c-2.4.2)] = OK
+$ compatriot "module-a-1.0.0 PASS"
 ```
+Some interesting things to note:
 
-### Example 2: Storing test results for composited component ###
+1. Compatriot assignments always begin with a purl. 
+2. Compatriot assignments always nd with a test state value from the enum PASS, FAIL, UNKNOWN.
+
+No output is given, the command returns exit code 0.
+
+### Example 2: Storing test results for composited packages ###
 *In the example below we store the fact that module-a, v1.0.0, containing module-b in version 1.10.1 and module-c in version 2.4.2 was tested OK.* 
 
  ```
-$ compatriot (module-a-1.0.0) [(module-b-1.10.1 module-c-2.4.2)] = OK
+$ compatriot "module-a-1.0.0 (module-b-1.10.1 module-c-2.4.2) PASS"
 ``` 
+Some interesting things to note:
 
-### Example: Query which if a specific version was tested ###
-*In the example below we query compatriot for its knowledge about a specific version of module-a. This has been tested and was ok.
+1. Composite assignments must adhere to the same rules as assignments to a single purl.
+2. There is no transitive implication of assignments. The assignment above does *not* mean that "module-b-1.10.1 PASS" gets stored in Compatriot.
+
+No output is given, the command returns exit code 0.
+
+### Example 3: Query test status of package ###
+*In the example below we query compatriot for its knowledge about a specific version of the package 'module-a'. This package has been tested and was tested ok.*
 
  ```
-$ compatriot module-a-1.0.0
-$ OK
+$ compatriot "module-a-1.0.0"
+$ PASS
 ``` 
+Some interesting things to note:
 
-If this specific purl had never been tested, we would get status UNKNOWN.
+1. Compatriot has no notion of timestamping, so it is entirely possible that if you re-run the query that produced a PASS result you might end up getting a different result.
+2. Compatriot has no security logic built in. Anyone with access to the frontend or database can overwrite values at any point in time.
+3. If this specific package had never been tested, we would get status UNKNOWN. It's entirely possible to assign the value UNKNOWN to a package at any point in time.
+
+## Examples of more advanced queries ##
+Compatriot supports globs in the version part of the package url. This is useful when you don't have full knowledge about releases of a particular package.
+
+### Example 4: Query test status of package 'module-a', version 1.0.? (wildcard patch version) ###
+*In this example we find all versions of the package 'module-a' that starts with 1.0*
+
+ ```
+$ compatriot "module-a-1.0.?"
+$ ---------------------------------
+$ | module-a-1.0.1 |   PASS     |
+$ | module-a-1.0.2 |   PASS     |
+$ | module-a-1.0.3 |   PASS     |
+$ | module-a-1.0.4 |   FAIL     |
+$ | module-a-1.0.5 |   PASS     |
+$ | module-a-1.0.6 |   UNKNOWN  |
+$ ---------------------------------
+ ```
+
+Some interesting things to note:
+The ordering of results is not guaranteed and has no intrinsic meaning, i.e. the results to the query in this example could just as well look like this:
+
+ ```
+$ ---------------------------------
+$ | module-a-1.0.6   |   UNKNOWN  |
+$ | module-a-1.0.5   |   PASS     |
+$ | module-a-1.0.3   |   PASS     |
+$ | module-a-1.0.2   |   PASS     |
+$ | module-a-1.0.4   |   FAIL     |
+$ | module-a-1.0.1   |   PASS     |
+$ ---------------------------------
+ ```
+
+### Example 5: Query test status of package 'module-a', version 1.0.?, considering composites in specific versions ###
+*Here we try to find the composited versions of 'module-a' with fixed versions of the composities.*
+
+ ```
+$ compatriot "module-a-1.0.? (module-b-1.10.1 module-c-2.4.2)"
+$ ---------------------------------
+$ | module-a-1.0.1   |   PASS     |
+$ | module-a-1.0.2   |   PASS     |
+$ | module-a-1.0.3   |   PASS     |
+$ | module-a-1.0.4   |   FAIL     |
+$ | module-a-1.0.5   |   PASS     |
+$ | module-a-1.0.6   |   UNKNOWN  |
+$ ---------------------------------
+ ```
+
+ Some interesting things to note:
+1. This query could produce an empty result set if no such composites exist.
+2. It is allowed to use wildcard in composite versions as well.
+3. The '++' after the package url is a shorthand, so instead of:
+
+ ``` 
+$ ------------------------------------------------------------------
+$ | module-a-1.0.0 (module-b-1.10.1 module-c-2.4.2)   |   PASS     |
+$ ------------------------------------------------------------------
+ ```
+
+we have simply
+
+``` 
+$ ----------------------------------
+$ | module-a-1.0.0++  |   PASS     |
+$ ----------------------------------
+```
+
+Each package that has a glob in the version specification is included in the output.  
+The '++' indicates that there are more packages in the query result that are not being shown.
+
+The query would *not* consider module-a-1.0.6-rc1, because it does not match the ? qualifier.
+
+
+# Examples of how to specify test scopes in assignments and queries
+Coming soon
+
+# Project layout and distributables
+Coming soon...
+
+# Ideas for integrations on top of Compatriot
+Coming soon...
 
