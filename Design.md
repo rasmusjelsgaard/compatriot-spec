@@ -151,12 +151,12 @@ The '++' indicates that there are more packages in the query result that are not
 The query would *not* consider module-a-1.0.6-rc1, because it does not match the ? qualifier.
 
 
-## Examples of how to specify test scopes in assignments and queries
-New functionality often starts its life in a developer's machine before ending up in a branch. And so testing often (hopefully) begins here. It is useful to be able to distinguish between the results of tests run on a local dev machine vs. tests run in CI/CD pipeline vs. acceptance tests run in a customer's pre-production environment.
+## Examples of how to specify test run scopes in assignments and queries
+New functionality often starts its life in a developer's machine before ending up in a branch. And so testing often (hopefully) begins here. It is useful to be able to distinguish between the results of a specific set of tests run on a local dev machine vs. the same tests executed in CI/CD pipeline vs. acceptance tests run in a customer's pre-production environment and so on.
 
-To support this, Compatriot allows specifying scopes for both assignment and retrieval of facts.
+Compatriot solves this by way of scope that can be specified for both assignment and retrieval of facts.
 
-### Example 6: Assign the result of test of a single package 
+### Example 6: Assign the result of test of a single package in local scope
 *In the following example we store the fact that module-a, version 1.0.0 was tested ok whilst running the tests locally at our machine*
 
 ```
@@ -173,7 +173,7 @@ $ compatriot --scope local "module-a-1.0.0 OK"
 ### Example 7: Store results in local scope and query in other scopes.
 ```
 $ compatriot --scope local "module-a-1.0.0 OK"
-$ compatriot --scope local,integreated "module-a-1.0.0"
+$ compatriot --scope local,integrated "module-a-1.0.0"
 $ UNKNOWN
 $ compatriot "module-a-1.0.0"
 $ UNKNOWN
