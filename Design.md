@@ -34,11 +34,11 @@ Compatriot also supports advanced queries that results in tuples of states. See 
 ### Features not in scope
 Compatriot does not come with any built-in support for CI/CD logic such as failing pipelines based on test results, nor does it gather information about the actual composition of software packages. It has no notion of "flaky" tests or similar concepts. These concerns are left to the tools "on top of" Compatriot.
 
-### Examples using the Compatriot CLI
+## Examples using the Compatriot CLI
 The examples below assume that:
 - Compatriot has been setup to point to a redis store beforehand. This is where the data you provide as input to Compatriot is stored.
   
-Compatriot requires that packages be specified using the [purl notation](https://github.com/package-url/purl-spec). For brevity in the examples I am using a pseudo-purl notation: <package-atom>-<major.minor.patch>, i.e. module-a-1.0.0.
+Compatriot requires that packages be specified using the [purl notation](https://github.com/package-url/purl-spec). For brevity in the examples I am using a pseudo-purl notation: <package-atom>-<major.minor.patch>, i.e. module-a-1.0.0 instead of the full purl.
 
 ### Example 1: Storing test results
 *In the example below we assign the fact that module-a, 1.0.0 works (according to our tests at least)*
@@ -46,7 +46,7 @@ Compatriot requires that packages be specified using the [purl notation](https:/
 ```
 $ compatriot "module-a-1.0.0 PASS"
 ```
-Some interesting things to note:
+**Some interesting things to note:**
 
 1. Compatriot assignments always begin with a purl. 
 2. Compatriot assignments always nd with a test state value from the enum PASS, FAIL, UNKNOWN.
@@ -59,7 +59,7 @@ No output is given, the command returns exit code 0.
  ```
 $ compatriot "module-a-1.0.0 (module-b-1.10.1 module-c-2.4.2) PASS"
 ``` 
-Some interesting things to note:
+**Some interesting things to note:**
 
 1. Composite assignments must adhere to the same rules as assignments to a single purl.
 2. There is no transitive implication of assignments. The assignment above does *not* mean that "module-b-1.10.1 PASS" gets stored in Compatriot.
@@ -73,7 +73,7 @@ No output is given, the command returns exit code 0.
 $ compatriot "module-a-1.0.0"
 $ PASS
 ``` 
-Some interesting things to note:
+**Some interesting things to note:**
 
 1. Compatriot has no notion of timestamping, so it is entirely possible that if you re-run the query that produced a PASS result you might end up getting a different result.
 2. Compatriot has no security logic built in. Anyone with access to the frontend or database can overwrite values at any point in time.
@@ -97,7 +97,7 @@ $ | module-a-1.0.6 |   UNKNOWN  |
 $ ---------------------------------
  ```
 
-Some interesting things to note:
+**Some interesting things to note:**
 The ordering of results is not guaranteed and has no intrinsic meaning, i.e. the results to the query in this example could just as well look like this:
 
  ```
@@ -126,7 +126,7 @@ $ | module-a-1.0.6   |   UNKNOWN  |
 $ ---------------------------------
  ```
 
- Some interesting things to note:
+ **Some interesting things to note:**
 1. This query could produce an empty result set if no such composites exist.
 2. It is allowed to use wildcard in composite versions as well.
 3. The '++' after the package url is a shorthand, so instead of:
@@ -151,11 +151,54 @@ The '++' indicates that there are more packages in the query result that are not
 The query would *not* consider module-a-1.0.6-rc1, because it does not match the ? qualifier.
 
 
-# Examples of how to specify test scopes in assignments and queries
-Coming soon
+## Examples of how to specify test scopes in assignments and queries
+New functionality often starts its life in a developer's machine before ending up in a branch. And so testing often (hopefully) begins here. It is useful to be able to distinguish between the results of tests run on a local dev machine vs. tests run in CI/CD pipeline vs. acceptance tests run in a customer's pre-production environment.
+
+To support this, Compatriot allows specifying scopes for both assignment and retrieval of facts.
+
+### Example 6: Assign the result of test of a single package 
+*In the following example we store the fact that module-a, version 1.0.0 was tested ok whilst running the tests locally at our machine*
+
+```
+$ compatriot --scope local "module-a-1.0.0 OK"
+```
+
+**Some interesting things to note:**
+1. More than one scope must be specified, in this case they are separated by commas.
+2. At least one scope must be specified.
+3. The default scope is all, which always includes all other scopes.
+4. Valid scopes are: local, integrated, functional, non-functional, release, deploy, all.
+5. The scopes are "just" labels, they serve only to filter queries as you will see in the next examples.
+
+### Example 7: Store results in local scope and query in other scopes.
+```
+$ compatriot --scope local "module-a-1.0.0 OK"
+$ compatriot --scope local,integreated "module-a-1.0.0"
+$ UNKNOWN
+$ compatriot "module-a-1.0.0"
+$ UNKNOWN
+```
+
+**Some interesting things to note:**
+1. If at least one scope would return UNKNOWN, the result of the query will be UNKNOWN.
+
+### Example 8: 
+
 
 # Project layout and distributables
-Coming soon...
+Compatriot consists of four main repositories:
+
+## compatriot-cli
+Command line interface to lib-compatriot.
+
+## compatriot-web
+Web interface to lib-compatriot. 
+
+## lib-compatriot 
+Provides the parser functionality to lex and parse compatriot expressions and make sure they are syntactically correct. Depends on compatriot-persistence for the actual data storage and retrieval.
+
+## compatriot-persistence
+Provides storage and query functionality for lib-compatriot.
 
 # Ideas for integrations on top of Compatriot
 Coming soon...
