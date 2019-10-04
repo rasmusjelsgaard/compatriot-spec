@@ -184,6 +184,42 @@ $ UNKNOWN
 
 ### Example 8: 
 
+$ compatriot "module-a-1.0.0 OK"
+$ compatriot --scope integrated "module-a-1.0.0"
+$ OK
+
+
+
+```plantuml
+@startuml
+
+package "compatriot-web" {
+  [http-server]  
+}
+
+package "compatriot-cli" {
+  [auto-completer]
+  [params-parser]
+}
+
+package "compatriot-persistence" {
+    [redis-client]
+    [data-access]
+}
+
+package "lib-compatriot" {
+    [parser]
+    [lexer]
+}
+
+[http-server] --> [lexer]
+[params-parser] --> [lexer]
+[auto-completer] --> [lexer]
+[lexer] --> [parser]
+[parser] --> [data-access]
+
+@enduml
+```
 
 # Project layout and distributables
 Compatriot consists of four main repositories:
