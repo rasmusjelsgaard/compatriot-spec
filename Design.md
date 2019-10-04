@@ -1,12 +1,3 @@
-# Table of contents
-1. [Problems solved with compatriot](#problems-solved-by-compatriot)
-   1. [The problem](#the-problem)
-   2. [The solution](#the-solution)
-2. [Use cases](#use-cases)
-3. [Features not in scope](#features-not-in-scope)
-4. [Examples using the Compatriot CLI](#examples-using-the-compatriot-cli)
-5. [Project layout and distributables](#project-layout-and-distributables)
-
 # Problems solved by Compatriot
 
 ## The problem
@@ -183,12 +174,11 @@ $ UNKNOWN
 1. If at least one scope would return UNKNOWN, the result of the query will be UNKNOWN.
 
 ### Example 8: 
-
-$ compatriot "module-a-1.0.0 OK"
+```
+$ compatriot "module-a-1.0.0 PASS"
 $ compatriot --scope integrated "module-a-1.0.0"
-$ OK
-
-
+$ PASS
+```
 
 ```plantuml
 @startuml
@@ -237,5 +227,7 @@ Provides the parser functionality to lex and parse compatriot expressions and ma
 Provides storage and query functionality for lib-compatriot.
 
 # Ideas for integrations on top of Compatriot
-Coming soon...
+Much of the value Compatriot provides comes from integrations. Below are some of the examples I imagine:
 
+1. Slurper that can consume [CycloneDX s-BOMs](#https://cyclonedx.org/#example-sbom) and store their contents in Compatriot as facts.
+2. Visual tool to make it easy to get an overview of what versions of software are not only supposedly compatible but also have been tested to be proven compatible.
