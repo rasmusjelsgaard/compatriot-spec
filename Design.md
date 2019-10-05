@@ -180,36 +180,10 @@ $ compatriot --scope integrated "module-a-1.0.0"
 $ PASS
 ```
 
-```plantuml
-@startuml
+## Architecture: Component layout
+Compatriot code is split into components in a coarse-grained manner by overall responsibility. The overall goal of this structure is to (mostly) interact with the lexer which has a very stable interface.
 
-package "compatriot-web" {
-  [http-server]  
-}
-
-package "compatriot-cli" {
-  [auto-completer]
-  [params-parser]
-}
-
-package "compatriot-persistence" {
-    [redis-client]
-    [data-access]
-}
-
-package "lib-compatriot" {
-    [parser]
-    [lexer]
-}
-
-[http-server] --> [lexer]
-[params-parser] --> [lexer]
-[auto-completer] --> [lexer]
-[lexer] --> [parser]
-[parser] --> [data-access]
-
-@enduml
-```
+![](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/rasmusjelsgaard/compatriot-spec/master/component-overview.puml?token=AAZOVYYQYZWETF2EGLS3YIC5TBPFS)
 
 # Project layout and distributables
 Compatriot consists of four main repositories:
@@ -229,5 +203,8 @@ Provides storage and query functionality for lib-compatriot.
 # Ideas for integrations on top of Compatriot
 Much of the value Compatriot provides comes from integrations. Below are some of the examples I imagine:
 
-1. Slurper that can consume [CycloneDX s-BOMs](#https://cyclonedx.org/#example-sbom) and store their contents in Compatriot as facts.
-2. Visual tool to make it easy to get an overview of what versions of software are not only supposedly compatible but also have been tested to be proven compatible.
+1. Slurper that can consume [CycloneDX s-BOMs](#https://cyclonedx.org/#example-sbom) and store their contents in Compatriot. Would be combined with a slurper for test runs to figure out the test run results. 
+2. Visual tool to make an overview of what versions of software are not only supposedly compatible but also have been tested to be proven compatible (according to tests).
+3. Visual tool that helps build more complex queries.
+4. Hardware + software compatibility extensions so that it becomes possible to store information about test runs on different hardware specs as well.
+  
