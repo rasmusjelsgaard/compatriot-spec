@@ -1,0 +1,30 @@
+```plantuml
+@startuml Component overview
+
+package "compatriot-web" {
+  [http-server]  
+}
+
+package "compatriot-cli" {
+  [auto-completer]
+  [params-parser]
+}
+
+package "compatriot-persistence" {
+    [redis-client]
+    [data-access]
+}
+
+package "lib-compatriot" {
+    [parser]
+    [lexer]
+}
+
+[http-server] --> [lexer]
+[params-parser] --> [lexer]
+[auto-completer] --> [lexer]
+[lexer] --> [parser]
+[parser] --> [data-access]
+
+@enduml
+```
