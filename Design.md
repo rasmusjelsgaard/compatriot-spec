@@ -7,7 +7,7 @@ The problem: it requires a lot of manual work to compile useful information abou
 
 ## The solution
 Compatriot solves this by providing a simple way to store and query information about software composition tests.  
-It does this by storing test run results as facts about whether a given software composition configruation has been tested.  
+It does this by storing test run results as facts about whether a given software composition configuration has been tested.  
 Compatriot can then be queried about the test run state of specific software compositions.  
 In their simplest form, these queries always result one of three states:
 
@@ -40,7 +40,7 @@ $ compatriot "module-a-1.0.0 PASS"
 **Some interesting things to note:**
 
 1. Compatriot assignments always begin with a purl. 
-2. Compatriot assignments always nd with a test state value from the enum PASS, FAIL, UNKNOWN.
+2. Compatriot assignments always end with a test state value from the enum PASS, FAIL, UNKNOWN.
 
 No output is given, the command returns exit code 0.
 
@@ -103,7 +103,7 @@ $ ---------------------------------
  ```
 
 ### Example 5: Query test status of package 'module-a', version 1.0.?, considering composites in specific versions ###
-*Here we try to find the composited versions of 'module-a' with fixed versions of the composities.*
+*Here we try to find the composited versions of 'module-a' with fixed versions of the composites.*
 
  ```
 $ compatriot "module-a-1.0.? (module-b-1.10.1 module-c-2.4.2)"
@@ -145,25 +145,25 @@ The query would *not* consider module-a-1.0.6-rc1, because it does not match the
 ## Examples of how to specify test run scopes in assignments and queries
 New functionality often starts its life in a developer's machine before ending up in a branch. And so testing often (hopefully) begins here. It is useful to be able to distinguish between the results of a specific set of tests run on a local dev machine vs. the same tests executed in CI/CD pipeline vs. acceptance tests run in a customer's pre-production environment and so on.
 
-Compatriot solves this by way of scope that can be specified for both assignment and retrieval of facts.
+Compatriot solves this introducing a scope that can be specified for both assignment and retrieval of facts.
 
 ### Example 6: Assign the result of test of a single package in local scope
 *In the following example we store the fact that module-a, version 1.0.0 was tested ok whilst running the tests locally at our machine*
 
 ```
-$ compatriot --scope local "module-a-1.0.0 OK"
+$ compatriot --scope local "module-a-1.0.0 PASS"
 ```
 
 **Some interesting things to note:**
-1. More than one scope must be specified, in this case they are separated by commas.
-2. At least one scope must be specified.
-3. The default scope is all, which always includes all other scopes.
-4. Valid scopes are: local, integrated, functional, non-functional, release, deploy, all.
+1. At least one scope must be specified.
+2. Valid scopes are: local, integrated, functional, non-functional, release, deploy, all (default).
+3. The scope all always includes all other scopes.
+4. More than one scope can be specified, in this case they are separated by commas.
 5. The scopes are "just" labels, they serve only to filter queries as you will see in the next examples.
 
 ### Example 7: Store results in local scope and query in other scopes.
 ```
-$ compatriot --scope local "module-a-1.0.0 OK"
+$ compatriot --scope local "module-a-1.0.0 PASS"
 $ compatriot --scope local,integrated "module-a-1.0.0"
 $ UNKNOWN
 $ compatriot "module-a-1.0.0"
