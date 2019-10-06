@@ -145,7 +145,7 @@ The query would *not* consider module-a-1.0.6-rc1, because it does not match the
 ## Examples of how to specify test run scopes in assignments and queries
 New functionality often starts its life in a developer's machine before ending up in a branch. And so testing often (hopefully) begins here. It is useful to be able to distinguish between the results of a specific set of tests run on a local dev machine vs. the same tests executed in CI/CD pipeline vs. acceptance tests run in a customer's pre-production environment and so on.
 
-Compatriot solves this introducing a scope that can be specified for both assignment and retrieval of facts.
+Compatriot solves this by introducing a scope that can be specified for both assignment and retrieval of facts.
 
 ### Example 6: Assign the result of test of a single package in local scope
 *In the following example we store the fact that module-a, version 1.0.0 was tested ok whilst running the tests locally at our machine*
